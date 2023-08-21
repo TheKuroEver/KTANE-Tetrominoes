@@ -4,7 +4,7 @@ using UnityEngine;
 // * ModKit Documentation: https://github.com/Qkrisi/ktanemodkit/wiki
 [RequireComponent(typeof(KMBombModule), typeof(KMSelectable))]
 [RequireComponent(typeof(KMAudio), typeof(KMBombInfo))]
-public partial class ModuleModule : MonoBehaviour
+public partial class TetrominoesModule : MonoBehaviour
 {
     private KMBombModule _module;
     private KMBombInfo _bombInfo;

@@ -1,7 +1,7 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Text.RegularExpressions;
 
-partial class ModuleModule
+partial class TetrominoesModule
 {
     // * TP Documentation: https://github.com/samfundev/KtaneTwitchPlays/wiki/External-Mod-Module-Support
 #pragma warning disable IDE0051, IDE1006
