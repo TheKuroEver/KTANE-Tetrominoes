@@ -20,8 +20,6 @@ public partial class TetrominoesModule : MonoBehaviour
         _module = GetComponent<KMBombModule>();
         _bombInfo = GetComponent<KMBombInfo>();
         _audio = GetComponent<KMAudio>();
-
-        Log("Test");
     }
 #pragma warning restore IDE0051
 
