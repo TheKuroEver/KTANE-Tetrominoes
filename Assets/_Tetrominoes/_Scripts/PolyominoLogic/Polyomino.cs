@@ -5,8 +5,10 @@ using UnityEngine;
 public class Polyomino
 {
     private Vector2Int[] _relativeOccupiedPositions;
+    private PolyominoRenderer _renderer;
+    private int _rotationCount;
 
-    public Polyomino(Vector2Int[] positions) {
+    public Polyomino(Vector2Int[] positions, MonominoRenderer monominoPrefab, Transform parent) {
         if (positions.Length == 0)
             throw new InvalidOperationException("No positions provided to Polyomino constructor.");
         if (positions.Length != positions.Distinct().Count())
@@ -17,6 +19,8 @@ public class Polyomino
         _relativeOccupiedPositions = positions.ToArray();
         SnapToOrigin();
         SetDefaultRotation();
+
+        _renderer = PolyominoRenderer.Instantiate(this, monominoPrefab, parent);
     }
 
     // Any two polyominoes with the same 'shape' (differing only by rotation) will have the same shape string.
@@ -37,9 +41,7 @@ public class Polyomino
         string[] original = possibleFootprints.ToArray();
         Array.Sort(possibleFootprints);
         Shape = possibleFootprints[0];
-
-        for (int i = 0, count = Array.IndexOf(original, Shape); i < count; i++)
-            Rotate(Rotation.Clockwise);
+        _rotationCount = (4 - Array.IndexOf(original, Shape)) % 4;
     }
 
     private void SnapToOrigin() {
@@ -49,9 +51,14 @@ public class Polyomino
 
     public void Rotate(Rotation direction) {
         switch (direction) {
-            case Rotation.Clockwise: _relativeOccupiedPositions = _relativeOccupiedPositions.Select(pos => new Vector2Int(pos.y, -pos.x)).ToArray(); break;
-            case Rotation.Counterclockwise: _relativeOccupiedPositions = _relativeOccupiedPositions.Select(pos => new Vector2Int(-pos.y, pos.x)).ToArray(); break;
-            default: throw new InvalidOperationException($"Unexpected Rotation value: {direction}.");
+            case Rotation.Clockwise:
+                _relativeOccupiedPositions = _relativeOccupiedPositions.Select(pos => new Vector2Int(pos.y, -pos.x)).ToArray();
+                break;
+            case Rotation.Counterclockwise:
+                _relativeOccupiedPositions = _relativeOccupiedPositions.Select(pos => new Vector2Int(-pos.y, pos.x)).ToArray();
+                break;
+            default:
+                throw new InvalidOperationException($"Unexpected Rotation value: {direction}.");
         }
         SnapToOrigin();
     }

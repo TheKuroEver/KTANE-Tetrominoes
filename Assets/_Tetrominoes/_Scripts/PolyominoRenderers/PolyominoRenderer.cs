@@ -10,7 +10,7 @@ public class PolyominoRenderer : MonoBehaviour
 
     public MonominoRenderer GetMonomino(Vector2Int position) => _monominoes[position];
 
-    public static PolyominoRenderer Instantiate(Polyomino polyomino, MonominoRenderer monominoPrefab) {
+    public static PolyominoRenderer Instantiate(Polyomino polyomino, MonominoRenderer monominoPrefab, Transform parent) {
         var renderer = new GameObject("Polyomino").AddComponent<PolyominoRenderer>();
         int maxX = 0;
         int maxY = 0;
@@ -25,6 +25,9 @@ public class PolyominoRenderer : MonoBehaviour
         }
 
         renderer.Centre = new Vector2(maxX / 2f, maxY / 2f);
+        renderer.transform.parent = parent;
+        renderer.transform.localScale = Vector3.zero;
+        renderer.transform.localRotation = Quaternion.identity;
         return renderer;
     }
 }
