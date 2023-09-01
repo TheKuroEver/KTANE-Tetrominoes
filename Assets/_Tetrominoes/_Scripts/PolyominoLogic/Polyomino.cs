@@ -52,6 +52,7 @@ public class Polyomino
         SnapToOrigin();
     }
 
+    public Vector2Int[] GetPositionsFromOrigin() => GetPositionsFromOrigin(Vector2Int.zero);
     public Vector2Int[] GetPositionsFromOrigin(Vector2Int origin) => _relativeOccupiedPositions.Select(pos => pos + origin).ToArray();
 
     public override string ToString() => ToString(origin: Vector2Int.zero);
