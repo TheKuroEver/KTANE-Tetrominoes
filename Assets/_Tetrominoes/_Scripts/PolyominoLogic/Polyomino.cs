@@ -16,13 +16,13 @@ public class Polyomino
 
         _relativeOccupiedPositions = positions.ToArray();
         SnapToOrigin();
-        CalculateShape();
+        SetDefaultRotation();
     }
 
     // Any two polyominoes with the same 'shape' (differing only by rotation) will have the same shape string.
     public string Shape { get; private set; }
 
-    private void CalculateShape() {
+    private void SetDefaultRotation() {
         var possibleFootprints = new string[4];
 
         for (int rotIx = 0; rotIx < 4; rotIx++) {
@@ -30,12 +30,16 @@ public class Polyomino
             for (int posIx = 0; posIx < positions.Length; posIx++)
                 positions[posIx] = $"{_relativeOccupiedPositions[posIx].x},{_relativeOccupiedPositions[posIx].y}";
             Array.Sort(positions);
-            possibleFootprints[rotIx] = positions.Join();
+            possibleFootprints[rotIx] = $"[{positions.Join()}]";
             Rotate(Rotation.Clockwise);
         }
 
+        string[] original = possibleFootprints.ToArray();
         Array.Sort(possibleFootprints);
         Shape = possibleFootprints[0];
+
+        for (int i = 0, count = Array.IndexOf(original, Shape); i < count; i++)
+            Rotate(Rotation.Clockwise);
     }
 
     private void SnapToOrigin() {
