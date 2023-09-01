@@ -4,19 +4,27 @@ using UnityEngine;
 
 public class PolyominoRenderer : MonoBehaviour
 {
-    private MonominoRenderer[] _monominoes;
+    private Dictionary<Vector2Int, MonominoRenderer> _monominoes = new Dictionary<Vector2Int, MonominoRenderer>();
 
-    public static PolyominoRenderer Instantiate(Transform parent, Vector2Int position, Polyomino polyomino, MonominoRenderer monominoPrefab) {
+    public Vector2 Centre { get; private set; }
+
+    public MonominoRenderer GetMonomino(Vector2Int position) => _monominoes[position];
+
+    public static PolyominoRenderer Instantiate(Polyomino polyomino, MonominoRenderer monominoPrefab) {
         var renderer = new GameObject("Polyomino").AddComponent<PolyominoRenderer>();
-        renderer.transform.parent = parent;
-        renderer.transform.localScale = Vector3.one;
-        renderer.transform.localPosition = new Vector3(position.x, 0, position.y);
+        int maxX = 0;
+        int maxY = 0;
 
-        foreach (Vector2Int pos in polyomino.GetPositionsFromOrigin()) {
-            var monomino = Instantiate(monominoPrefab, renderer.transform);
-            monomino.transform.localPosition = new Vector3(pos.x, 0, pos.y);
+        foreach (Vector2Int position in polyomino.GetPositionsFromOrigin()) {
+            maxX = Mathf.Max(maxX, position.x);
+            maxY = Mathf.Max(maxY, position.y);
+
+            MonominoRenderer monomino = Instantiate(monominoPrefab, renderer.transform);
+            monomino.transform.localPosition = new Vector3(position.x, 0, position.y);
+            renderer._monominoes.Add(position, monomino);
         }
 
+        renderer.Centre = new Vector2(maxX / 2f, maxY / 2f);
         return renderer;
     }
 }
