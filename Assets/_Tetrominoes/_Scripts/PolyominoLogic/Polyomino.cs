@@ -18,8 +18,8 @@ public class Polyomino
 
         _relativeOccupiedPositions = positions.ToArray();
         SnapToOrigin();
-        _renderer = PolyominoRenderer.Instantiate(this, monominoPrefab, parent);
         SetDefaultRotation();
+        _renderer = PolyominoRenderer.Instantiate(this, monominoPrefab, parent);
     }
 
     // Any two polyominoes with the same 'shape' (differing only by rotation) will have the same shape string.
@@ -34,7 +34,7 @@ public class Polyomino
                 positions[posIx] = $"{_relativeOccupiedPositions[posIx].x},{_relativeOccupiedPositions[posIx].y}";
             Array.Sort(positions);
             possibleFootprints[rotIx] = $"[{positions.Join()}]";
-            Rotate(Rotation.Clockwise);
+            MapRotation(Rotation.Clockwise);
         }
 
         string[] original = possibleFootprints.ToArray();
@@ -48,12 +48,16 @@ public class Polyomino
         _relativeOccupiedPositions = _relativeOccupiedPositions.Select(pos => pos - bottomLeftCorner).ToArray();
     }
 
-    public void Rotate(Rotation direction) {
+    private void MapRotation(Rotation direction) {
         switch (direction) {
-            case Rotation.Clockwise: _relativeOccupiedPositions = _relativeOccupiedPositions.Select(pos => new Vector2Int(pos.y, -pos.x)).ToArray(); break;
-            case Rotation.Counterclockwise: _relativeOccupiedPositions = _relativeOccupiedPositions.Select(pos => new Vector2Int(-pos.y, pos.x)).ToArray(); break;
+            case Rotation.Clockwise: _relativeOccupiedPositions = _relativeOccupiedPositions.Select(pos => new Vector2Int(pos.y, -pos.x)).ToArray(); _rotationCount = (_rotationCount + 1) % 4; break;
+            case Rotation.Counterclockwise: _relativeOccupiedPositions = _relativeOccupiedPositions.Select(pos => new Vector2Int(-pos.y, pos.x)).ToArray(); _rotationCount = (_rotationCount + 3) % 4; break;
             default: throw new InvalidOperationException($"Unexpected Rotation value: {direction}.");
         }
+    }
+
+    public void Rotate(Rotation direction) {
+        MapRotation(direction);
         SnapToOrigin();
         _renderer.Rotate(direction);
     }

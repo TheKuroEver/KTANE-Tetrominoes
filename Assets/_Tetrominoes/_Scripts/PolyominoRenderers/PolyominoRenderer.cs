@@ -1,13 +1,21 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PolyominoRenderer : MonoBehaviour
 {
+    private const float s_rotationTime = .1f;
+    private const float s_translationTime = .1f;
+
     private Dictionary<Vector2Int, MonominoRenderer> _monominoes = new Dictionary<Vector2Int, MonominoRenderer>();
 
     private Transform _container;
     private Vector3 _centre;
+
+    private Coroutine _containerRotationAnimation;
+    private Coroutine _containerTranslationAnimation;
+    private Coroutine _parentTranslationAnimation;
 
     public MonominoRenderer GetMonomino(Vector2Int position) => _monominoes[position];
 
@@ -30,8 +38,8 @@ public class PolyominoRenderer : MonoBehaviour
 
         renderer._container.parent = renderer.transform;
         renderer.transform.parent = parent;
-        renderer.transform.localScale = Vector3.zero;
         renderer.transform.localPosition = Vector3.zero;
+        renderer.transform.localScale = Vector3.one;
         renderer.transform.localRotation = Quaternion.identity;
 
         renderer._centre = new Vector3(maxX / 2f, 0, maxY / 2f);
@@ -42,15 +50,43 @@ public class PolyominoRenderer : MonoBehaviour
         return renderer;
     }
 
-    public void SetLocalPosition(Vector3 position) => transform.localPosition = position;
+    public void SetLocalPosition(Vector3 position) => AnimateTranslation(position);
 
     public void Rotate(Rotation direction) {
         switch (direction) {
-            case Rotation.Clockwise: _container.Rotate(Vector3.up * 90); break;
-            case Rotation.Counterclockwise: _container.Rotate(Vector3.up * -90); break;
+            case Rotation.Clockwise: AnimateRotation(90); break;
+            case Rotation.Counterclockwise: AnimateRotation(-90); break;
             default: throw new System.InvalidOperationException($"Unexpected Rotation value: {direction}.");
         }
         _centre = new Vector3(_centre.z, 0, _centre.x);
-        _container.localPosition = _centre;
+        StopCoroutineIfNotNull(_containerTranslationAnimation);
+        _containerTranslationAnimation = StartCoroutine(AnimateInterpolatableProperty((value) => _container.localPosition = value, _container.localPosition, _centre, Vector3.Lerp, s_translationTime));
+    }
+
+    private void AnimateTranslation(Vector3 newPosition) {
+        StopCoroutineIfNotNull(_parentTranslationAnimation);
+        _parentTranslationAnimation = StartCoroutine(AnimateInterpolatableProperty((value) => transform.localPosition = value, transform.localPosition, newPosition, Vector3.Lerp, s_translationTime));
+    }
+
+    private void AnimateRotation(float clockwiseAngle) {
+        var oldRotation = _container.localRotation;
+        var newRotation = _container.localRotation * Quaternion.AngleAxis(clockwiseAngle, Vector3.up);
+        StopCoroutineIfNotNull(_containerRotationAnimation);
+        _containerRotationAnimation = StartCoroutine(AnimateInterpolatableProperty((value) => _container.localRotation = value, oldRotation, newRotation, Quaternion.Lerp, s_rotationTime));
+    }
+
+    private IEnumerator AnimateInterpolatableProperty<T>(Action<T> setter, T oldValue, T newValue, Func<T, T, float, T> lerper, float totalTime) {
+        var elapsedTime = 0f;
+        while (elapsedTime < totalTime) {
+            setter.Invoke(lerper.Invoke(oldValue, newValue, elapsedTime / totalTime));
+            yield return null;
+            elapsedTime += Time.deltaTime;
+        }
+        setter.Invoke(newValue);
+    }
+
+    private void StopCoroutineIfNotNull(Coroutine coroutine) {
+        if (coroutine != null)
+            StopCoroutine(coroutine);
     }
 }
