@@ -1,0 +1,10 @@
+{
+  "name": "Tetrominoes-Editor",
+  "references": [
+    "Tetrominoes"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": []
+}
