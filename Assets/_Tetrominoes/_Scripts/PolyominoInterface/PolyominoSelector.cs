@@ -9,6 +9,6 @@ public class PolyominoSelector : MonoBehaviour
 
     private void Awake() {
         // * This holder object should probably get its own class at some point.
-        _holder = ((GameObject)Instantiate(new GameObject("Holder"), transform, instantiateInWorldSpace: false)).transform;
+        _holder = ((MonoBehaviour)Instantiate(new GameObject("Holder").AddComponent<Holder>(), transform, instantiateInWorldSpace: false)).transform;
     }
 }

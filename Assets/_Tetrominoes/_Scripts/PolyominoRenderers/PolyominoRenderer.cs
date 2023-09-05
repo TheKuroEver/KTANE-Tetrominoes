@@ -31,6 +31,7 @@ public class PolyominoRenderer : MonoBehaviour
         renderer._container.parent = renderer.transform;
         renderer.transform.parent = parent;
         renderer.transform.localScale = Vector3.zero;
+        renderer.transform.localPosition = Vector3.zero;
         renderer.transform.localRotation = Quaternion.identity;
 
         renderer._centre = new Vector3(maxX / 2f, 0, maxY / 2f);
