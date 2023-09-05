@@ -18,9 +18,8 @@ public class Polyomino
 
         _relativeOccupiedPositions = positions.ToArray();
         SnapToOrigin();
-        SetDefaultRotation();
-
         _renderer = PolyominoRenderer.Instantiate(this, monominoPrefab, parent);
+        SetDefaultRotation();
     }
 
     // Any two polyominoes with the same 'shape' (differing only by rotation) will have the same shape string.
@@ -51,16 +50,12 @@ public class Polyomino
 
     public void Rotate(Rotation direction) {
         switch (direction) {
-            case Rotation.Clockwise:
-                _relativeOccupiedPositions = _relativeOccupiedPositions.Select(pos => new Vector2Int(pos.y, -pos.x)).ToArray();
-                break;
-            case Rotation.Counterclockwise:
-                _relativeOccupiedPositions = _relativeOccupiedPositions.Select(pos => new Vector2Int(-pos.y, pos.x)).ToArray();
-                break;
-            default:
-                throw new InvalidOperationException($"Unexpected Rotation value: {direction}.");
+            case Rotation.Clockwise: _relativeOccupiedPositions = _relativeOccupiedPositions.Select(pos => new Vector2Int(pos.y, -pos.x)).ToArray(); break;
+            case Rotation.Counterclockwise: _relativeOccupiedPositions = _relativeOccupiedPositions.Select(pos => new Vector2Int(-pos.y, pos.x)).ToArray(); break;
+            default: throw new InvalidOperationException($"Unexpected Rotation value: {direction}.");
         }
         SnapToOrigin();
+        _renderer.Rotate(direction);
     }
 
     public Vector2Int[] GetPositionsFromOrigin() => GetPositionsFromOrigin(Vector2Int.zero);
