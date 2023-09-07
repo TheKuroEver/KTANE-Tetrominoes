@@ -25,6 +25,18 @@ public class Polyomino
     // Any two polyominoes with the same 'shape' (differing only by rotation) will have the same shape string.
     public string Shape { get; private set; }
 
+    public void SetPosition(Vector3 position) => _renderer.SetLocalPosition(position);
+    public void SetPosition(Vector3 position, Transform parent) {
+        _renderer.SetParent(parent);
+        _renderer.SetLocalPosition(position);
+    }
+
+    public void SetPositionByGeometricCentre(Vector3 position) => _renderer.SetLocalPositionByGeometricCentre(position);
+    public void SetPositionByGeometricCentre(Vector3 position, Transform parent) {
+        _renderer.SetParent(parent);
+        _renderer.SetLocalPositionByGeometricCentre(position);
+    }
+
     private void SetDefaultRotation() {
         var possibleFootprints = new string[4];
 

@@ -17,7 +17,11 @@ public class PolyominoRenderer : MonoBehaviour
     private Coroutine _containerTranslationAnimation;
     private Coroutine _parentTranslationAnimation;
 
-    public MonominoRenderer GetMonomino(Vector2Int position) => _monominoes[position];
+    public void SetParent(Transform parent) => transform.parent = parent;
+
+    public void SetLocalPosition(Vector3 position) => AnimateTranslation(position);
+
+    public void SetLocalPositionByGeometricCentre(Vector3 position) => SetLocalPosition(position - _centre);
 
     // Each PolyominoRenderer houses a "container" which, in turn, contains the monominoes.
     // The "container" is placed such that the bottom-left of the bounding box of the monominoes is at the renderer's origin.
@@ -50,7 +54,7 @@ public class PolyominoRenderer : MonoBehaviour
         return renderer;
     }
 
-    public void SetLocalPosition(Vector3 position) => AnimateTranslation(position);
+    public MonominoRenderer GetMonomino(Vector2Int position) => _monominoes[position];
 
     public void Rotate(Rotation direction) {
         switch (direction) {
