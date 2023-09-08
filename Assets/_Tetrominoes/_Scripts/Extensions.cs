@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public static class VectorExtensions
+public static class Extensions
 {
     public static string ToDebugString(this Vector2Int vector) => $"[{vector.x}, {vector.y}]";
 
