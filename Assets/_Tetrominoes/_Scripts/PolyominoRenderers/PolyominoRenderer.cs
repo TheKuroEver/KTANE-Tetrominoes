@@ -5,19 +5,20 @@ using UnityEngine;
 
 public class PolyominoRenderer : MonoBehaviour
 {
-    private const float s_rotationTime = .1f;
-    private const float s_translationTime = .1f;
+    private const float s_animatedLerpTime = .1f;
 
     private Dictionary<Vector2Int, MonominoRenderer> _monominoes = new Dictionary<Vector2Int, MonominoRenderer>();
 
     private Transform _container;
     private Vector3 _centre;
 
+    private Coroutine _containerScaleAnimation;
     private Coroutine _containerRotationAnimation;
     private Coroutine _containerTranslationAnimation;
     private Coroutine _parentTranslationAnimation;
 
     public void SetParent(Transform parent) => transform.parent = parent;
+    public void SetLocalScale(Vector3 scale) => AnimateScale(scale);
 
     public void SetLocalPosition(Vector3 position) => AnimateTranslation(position);
 
@@ -43,7 +44,7 @@ public class PolyominoRenderer : MonoBehaviour
         renderer._container.parent = renderer.transform;
         renderer.transform.parent = parent;
         renderer.transform.localPosition = Vector3.zero;
-        renderer.transform.localScale = Vector3.one;
+        renderer.transform.localScale = Vector3.zero;
         renderer.transform.localRotation = Quaternion.identity;
 
         renderer._centre = new Vector3(maxX / 2f, 0, maxY / 2f);
@@ -60,29 +61,42 @@ public class PolyominoRenderer : MonoBehaviour
         switch (direction) {
             case Rotation.Clockwise: AnimateRotation(90); break;
             case Rotation.Counterclockwise: AnimateRotation(-90); break;
-            default: throw new System.InvalidOperationException($"Unexpected Rotation value: {direction}.");
+            default: throw new InvalidOperationException($"Unexpected Rotation value: {direction}.");
         }
         _centre = new Vector3(_centre.z, 0, _centre.x);
         StopCoroutineIfNotNull(_containerTranslationAnimation);
-        _containerTranslationAnimation = StartCoroutine(AnimateInterpolatableProperty((value) => _container.localPosition = value, _container.localPosition, _centre, Vector3.Lerp, s_translationTime));
+        _containerTranslationAnimation = StartCoroutine(AnimateVector3Property((value) => _container.localPosition = value, _container.localPosition, _centre));
+    }
+
+    private void AnimateScale(Vector3 newScale) {
+        StopCoroutineIfNotNull(_containerScaleAnimation);
+        _containerScaleAnimation = StartCoroutine(AnimateVector3Property((value) => transform.localScale = value, transform.localScale, newScale));
     }
 
     private void AnimateTranslation(Vector3 newPosition) {
         StopCoroutineIfNotNull(_parentTranslationAnimation);
-        _parentTranslationAnimation = StartCoroutine(AnimateInterpolatableProperty((value) => transform.localPosition = value, transform.localPosition, newPosition, Vector3.Lerp, s_translationTime));
+        _parentTranslationAnimation = StartCoroutine(AnimateVector3Property((value) => transform.localPosition = value, transform.localPosition, newPosition));
     }
 
     private void AnimateRotation(float clockwiseAngle) {
         var oldRotation = _container.localRotation;
         var newRotation = _container.localRotation * Quaternion.AngleAxis(clockwiseAngle, Vector3.up);
         StopCoroutineIfNotNull(_containerRotationAnimation);
-        _containerRotationAnimation = StartCoroutine(AnimateInterpolatableProperty((value) => _container.localRotation = value, oldRotation, newRotation, Quaternion.Lerp, s_rotationTime));
+        _containerRotationAnimation = StartCoroutine(AnimateQuaternionProperty((value) => _container.localRotation = value, oldRotation, newRotation));
     }
 
-    private IEnumerator AnimateInterpolatableProperty<T>(Action<T> setter, T oldValue, T newValue, Func<T, T, float, T> lerper, float totalTime) {
+    private IEnumerator AnimateVector3Property(Action<Vector3> setter, Vector3 oldValue, Vector3 newValue) {
+        return AnimateInterpolatableProperty(setter, oldValue, newValue, Vector3.Lerp);
+    }
+
+    private IEnumerator AnimateQuaternionProperty(Action<Quaternion> setter, Quaternion oldValue, Quaternion newValue) {
+        return AnimateInterpolatableProperty(setter, oldValue, newValue, Quaternion.Lerp);
+    }
+
+    private IEnumerator AnimateInterpolatableProperty<T>(Action<T> setter, T oldValue, T newValue, Func<T, T, float, T> lerper) {
         var elapsedTime = 0f;
-        while (elapsedTime < totalTime) {
-            setter.Invoke(lerper.Invoke(oldValue, newValue, elapsedTime / totalTime));
+        while (elapsedTime < s_animatedLerpTime) {
+            setter.Invoke(lerper.Invoke(oldValue, newValue, elapsedTime / s_animatedLerpTime));
             yield return null;
             elapsedTime += Time.deltaTime;
         }
